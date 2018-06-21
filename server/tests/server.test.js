@@ -8,10 +8,12 @@ const {User} = require('./../models/user');
 
 let listOfToDos = [{
 	_id: new ObjectID(),
-	text: 'First thing'
+	text: 'First thing from test file'
 }, {
 	_id: new ObjectID(),
-	text: 'Second thing'
+	text: 'Second thing from test file',
+	completed: true,
+	completedAt: 333
 }];
 
 beforeEach((done) => {
@@ -150,3 +152,53 @@ describe('DELETE /todos/:id', () => {
 			.end(done);
 	});
 });
+
+describe('PATCH /todos/:id', () => {
+	
+	it('Should update todo', (done) => {
+		// grab the first id 
+		var hexID = listOfToDos[0]._id.toHexString();
+		var textMod = 'update from test file';
+
+		request(app)
+			.patch(`/todos/${hexID}`)
+			.send({
+				text: textMod, 
+				completed: true
+			})
+			.expect(200)
+			.expect((res) => {
+				expect(res.body.todo.text).toBe(textMod);
+				expect(res.body.todo.completed).toBe(true);
+				expect(res.body.todo.completedAt).toBeA('number');
+			})
+			.end(done);
+	});
+
+	it('Should clear completedAt when todo is not completed', (done) => {
+		// grab the second id 
+		var hexID = listOfToDos[1]._id.toHexString();
+		var textMod = 'update from test file';
+
+		request(app)
+			.patch(`/todos/${hexID}`)
+			.send({
+				text: textMod, 
+				completed: false
+			})			
+			.expect(200)
+			.expect((res) => {
+				expect(res.body.todo.text).toBe(textMod);
+				expect(res.body.todo.completed).toBe(false);
+				expect(res.body.todo.completedAt).toNotExist;
+			})
+			.end(done);
+	});
+});
+
+
+
+
+
+
+
